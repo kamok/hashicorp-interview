@@ -13,14 +13,14 @@ In this tutorial, you will:
 - Docker (version 24.0 or greater)
 
 ## Install Terraform
-Visit the [Terraform installation page](https://developer.hashicorp.com/terraform/install) and select the appropriate installation method for your system. We will use the package manager [homebrew](https://brew.sh/) to install Terraform but you may choose whichever method you like.
+Visit the [Terraform installation page](https://developer.hashicorp.com/terraform/install) and select the appropriate installation method for your system. We use [Homebrew](https://brew.sh/) to install Terraform. You can use any method from the installation page.
 
 ```shell
 brew tap hashicorp/tap
 brew install hashicorp/tap/terraform
 ```
 
-Verify Terraform is installed on your machine correctly
+Verify Terraform is installed correctly
 ```shell
 $ terraform -version
 Terraform v1.13.4
@@ -31,7 +31,7 @@ Create a new directory for this tutorial
 ```shell
 $ mkdir terraform-tutorial
 ```
-Change your current directory to the newly created directory
+Change to the new directory
 ```shell
 $ cd terraform-tutorial
 ```
@@ -39,12 +39,12 @@ $ cd terraform-tutorial
 ### The Terraform Block
 The Terraform block defines the version of terraform for the project.
 
-Create a new file for the `terraform` block. You may name this file `terraform.tf` to fit the community convention.
+Create a new file for the `terraform` block. Name the file `terraform.tf` to follow community convention.
 ```shell
 $ touch terraform.tf
 ```
 
-In the `terraform` block, we version lock Terraform to at least `1.13`. Terraform uses [providers](https://developer.hashicorp.com/terraform/language/providers) to interface with cloud provider and service APIs. We are configuring this project to use version `3.6.2` of the `docker` provider.
+In the `terraform` block, version lock Terraform to at least `1.13`. Terraform uses [providers](https://developer.hashicorp.com/terraform/language/providers) to interface with cloud provider and service APIs. Configure this project to use version `3.6.2` of the `docker` provider.
 
 ```shell
 terraform {
@@ -59,7 +59,7 @@ terraform {
 ```
 
 ### Initialize terraform
-The `terraform init` command downloads and sets up the required `providers` defined in the terraform block. The command also generates a file called `.terraform.lock.hcl` to ensure integrity of providers between repeated runs.
+The `terraform init` command downloads and sets up the required `providers` defined in the terraform block. The command generates a file called `.terraform.lock.hcl` to ensure integrity of providers between repeated runs.
 
 ```shell
 $ terraform init
@@ -88,11 +88,12 @@ resource "docker_container" "nginx" {
 resource "docker_image" "nginx" {
   name = "nginx:latest"
 }
+```
 
 The `provider` block configures Terraform to use your local Docker daemon. The `resource` blocks define the infrastructure you want to create: a Docker container running nginx and its corresponding image. The docker_container resource references the docker_image resource using `docker_image.nginx.image_id`.
 
 ### Apply your infrastructure change
-Run `terraform apply` to begin the process. You will be prompted to review the changes, and you should enter `yes` once you are confident in your change.
+Run `terraform apply` to begin the process. Terraform displays a plan and prompts you to confirm. Enter yes to apply the changes after you have reviewed them.
 
 ```shell
 $ terraform apply
@@ -119,7 +120,13 @@ docker_container.nginx: Creation complete after 0s [id=337134c2a268afcd058f628b8
 Apply complete! Resources: 2 added, 0 changed, 0 destroyed.
 ```
 
-## Next steps
-In this tutorial, you learned how to manage infrastructure with Terraform by creating Docker resources on your local machine. Infrastructure as Code (IaC) increases deployment speed and efficiency through automation, while improving consistency and reliability by eliminating manual errors.
+### Validate your infrastructure
+List your running Docker containers.
+```shell
+$ docker ps
+CONTAINER ID   IMAGE          COMMAND                  CREATED          STATUS          PORTS     NAMES
+337134c2a268   nginx:latest   "nginx -g daemon off;"   1 minutes ago   Up 1 minutes             terraform_tutorial_container
+```
 
-In the next tutorial, you will learn how to safely destroy infrastructure managed by Terraform.
+## Next steps
+In this tutorial, you learned how to manage infrastructure with Terraform by creating Docker resources on your local machine. Infrastructure as Code (IaC) increases deployment speed and efficiency through automation, while improving consistency and reliability by eliminating manual errors. In the next tutorial, you will learn how to safely destroy infrastructure managed by Terraform.
