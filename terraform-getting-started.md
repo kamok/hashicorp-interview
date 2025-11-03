@@ -1,39 +1,88 @@
 # Getting Started with Terraform
 
-Terraform is the most popular langauge for defining and provisioning infrastructure as code (IaC).
+Terraform is an open-source tool for defining and provisioning infrastructure as code (IaC).
 
-To install Terraform, simply visit [Terraform.io](https://www.terraform.io/downloads.html) and download the compressed binary application executable file deliverable for your platform, machine or environment on which you like to run code and do development.
+In this tutorial, you will:
+- Install Terraform on your local machine
+- Initialize a Terraform project
+- Apply Terraform configuration to provision Docker infrastructure
+- Destroy the infrastructure with Terraform
 
-With Terraform installed, let's dive right into it and start creating some infrastructure.
+## Prerequisites
+- Command-line interface (CLI) experience
+- Unix-like environment (Linux or macOS)
 
-Most guys find it easiest to create a new directory on there local machine and create Terraform configuration code inside it.
+## Install Terraform
+Visit the [Terraform installation page](https://developer.hashicorp.com/terraform/install) and select the appropriate installation method for your system. We will use the package manager [homebrew](https://brew.sh/) to install Terraform but you may choose whichever method you like.
 
 ```shell
-$ mkdir terraform-demo
-$ cd terraform-demo
+brew tap hashicorp/tap
+brew install hashicorp/tap/terraform
 ```
 
-Next, create a file for your Terraform configuration code.
+Verify the successful installation of Terraform your machine
+```shell
+$ terraform -version
+Terraform v1.13.4
+```
+
+## Create your first terraform project
+Create a new directory for this tutorial
+```shell
+$ mkdir terraform-tutorial
+```
+Change your current directory to the newly created directory
+```shell
+$ cd terraform-tutorial
+```
+
+### The Terraform Block
+The Terraform block defines the version of terraform for the project.
+
+Create a new file for the terraform block. Conventionally we recommend naming this file `terraform.tf`
+```shell
+$ touch terraform.tf
+```
+
+In this `terraform` block, we version lock Terraform to at least `1.13`. Terraform uses [providers](https://developer.hashicorp.com/terraform/language/providers) to interface with cloud provider and service APIs. We are configuring this project to use version `3.6.2` of the `docker` provider.
 
 ```shell
-$ touch main.tf
-```
-
-Paste the following lines into the file.
-
-```hcl
 terraform {
   required_providers {
     docker = {
       source = "kreuzwerker/docker"
+      version = "3.6.2"
     }
   }
+  required_version = ">= 1.13"
 }
+```
+
+### Initialize terraform
+The `terraform init` command downloads, installs, and validates te required `providers` according to the terraform block. The command also generates a file called `.terraform.lock.hcl` to ensure integrity of providers between repeated runs.
+
+```shell
+$ terraform init
+Initializing the backend...
+Initializing provider plugins...
+- Finding kreuzwerker/docker versions matching "~> 3.6.2"...
+- Installing kreuzwerker/docker v3.6.2...
+- Installed kreuzwerker/docker v3.6.2 (self-signed, key ID BD080C4571C6104C)
+```
+
+### Create the docker provider
+Create a new file for the provider block. Conventionally we recommend naming this file `main.tf`.
+```shell
+$ touch main.tf
+```
+
+We recommend that your provider blocks be defined in a single file. In this block, we define two new `resource`, a docker container and a docker image.
+```hcl
 provider "docker" {
-    host = "unix:///var/run/docker.sock"
+  host = "unix:///var/run/docker.sock"
 }
 resource "docker_container" "nginx" {
-  image = docker_image.nginx.latest
+  image = docker_image.nginx.image_id
   name  = "training"
   ports {
     internal = 80
